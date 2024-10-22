@@ -29,9 +29,27 @@ export function App() {
 
       if (!response.ok) throw new Error("There was an error adding the todo");
 
-      const newTodo = await response.json();
+      const { newTodo } = await response.json();
+
+      console.log(newTodo);
 
       setTodos([...todos, newTodo]);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function deleteTodo(todoId: number) {
+    try {
+      const response = await fetch(`/api/delete-todo/${todoId}`, {
+        method: 'delete'
+      });
+
+      if (!response.ok) throw new Error("There was an error deleting this todo");
+
+      await response.json();
+
+      setTodos(todos.filter((todo) => todo.id !== todoId));
     } catch (error) {
       console.error(error);
     }
@@ -71,6 +89,18 @@ export function App() {
           />
           <button type="submit">Submit</button>
         </form>
+        <div className="todos-list-container">
+          <ul>
+            {todos.map((todo) => (
+              <li>
+                <p>{todo.value}</p>
+                <button onClick={() => deleteTodo(todo.id)} type="button">
+                  x
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
     </div>
   );

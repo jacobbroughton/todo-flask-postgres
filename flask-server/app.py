@@ -1,6 +1,7 @@
 from flask import Flask, request
 import os
 import psycopg2 as pg
+from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__)
 database = os.getenv("DATABASE_NAME")
@@ -20,7 +21,7 @@ CREATE_TODOS_TABLE = (
   );"""
 )
 
-GET_ALL_TODOS = "SELECT * FROM todos;"
+GET_ALL_TODOS = "SELECT * FROM todos WHERE is_deleted = false;"
 
 ADD_TODO = (
   """INSERT INTO todos (
@@ -28,12 +29,18 @@ ADD_TODO = (
   ) values (%s) returning *;"""
 )
 
+DELETE_TODO = (
+  """UPDATE todos
+  SET is_deleted = true
+  where id = %s"""
+)
+
 connection = pg.connect(host=host, user=user, password=password, database=database)
 
 @app.route('/api/get-all-todos')
 def getAllTodos():
   with connection:
-    with connection.cursor() as cursor:
+    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
       cursor.execute(CREATE_TODOS_TABLE)
       cursor.execute(GET_ALL_TODOS)
       todos = cursor.fetchall()
@@ -46,10 +53,17 @@ def addTodo():
   print("body: ", body)
 
   with connection:
-    with connection.cursor() as cursor:
+    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
       cursor.execute(ADD_TODO, (body["todoValue"], ))
       newTodo = cursor.fetchone()
       return {"newTodo": newTodo, "message": "Todo successfully added"}
+    
+@app.delete('/api/delete-todo/<todoIdToDelete>')
+def deleteTodo(todoIdToDelete):
+  with connection:
+    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+      cursor.execute(DELETE_TODO, (todoIdToDelete,))
+  return {"message": "Delete this todo: %s" % todoIdToDelete}
 
 
 if (__name__)== '__main__':
