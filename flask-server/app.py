@@ -21,18 +21,29 @@ CREATE_TODOS_TABLE = (
   );"""
 )
 
-GET_ALL_TODOS = "SELECT * FROM todos WHERE is_deleted = false;"
+GET_ALL_TODOS = (
+  """SELECT * FROM todos 
+  WHERE is_deleted = false;"""
+)
 
 ADD_TODO = (
   """INSERT INTO todos (
     value
-  ) values (%s) returning *;"""
+  ) values (%s) 
+  returning *;"""
 )
 
 DELETE_TODO = (
   """UPDATE todos
   SET is_deleted = true
   where id = %s"""
+)
+
+COMPLETE_TODO = (
+  """UPDATE todos
+  SET is_complete = true
+  where id = %s
+  returning *"""
 )
 
 connection = pg.connect(host=host, user=user, password=password, database=database)
@@ -63,8 +74,19 @@ def deleteTodo(todoIdToDelete):
   with connection:
     with connection.cursor(cursor_factory=RealDictCursor) as cursor:
       cursor.execute(DELETE_TODO, (todoIdToDelete,))
-  return {"message": "Delete this todo: %s" % todoIdToDelete}
+  return {"message": "Successfully deleted todo. ID: %s" % todoIdToDelete}
 
+@app.put("/api/complete-todo/<todoIdToComplete>")
+def completeTodo(todoIdToComplete):
+  with connection:
+    with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+      cursor.execute(COMPLETE_TODO, (todoIdToComplete, ))
+      completedTodo = cursor.fetchone()
+  return {
+    "message": "Successfully completed todo. ID: %s" % todoIdToComplete, 
+    "completedTodo": completedTodo
+  }
+    
 
 if (__name__)== '__main__':
   app.run(debug=True)

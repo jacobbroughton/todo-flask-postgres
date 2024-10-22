@@ -33,6 +33,7 @@ export function App() {
 
       console.log(newTodo);
 
+      setStagedTodoValue("");
       setTodos([...todos, newTodo]);
     } catch (error) {
       console.error(error);
@@ -42,7 +43,7 @@ export function App() {
   async function deleteTodo(todoId: number) {
     try {
       const response = await fetch(`/api/delete-todo/${todoId}`, {
-        method: 'delete'
+        method: "delete",
       });
 
       if (!response.ok) throw new Error("There was an error deleting this todo");
@@ -50,6 +51,27 @@ export function App() {
       await response.json();
 
       setTodos(todos.filter((todo) => todo.id !== todoId));
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function completeTodo(todoId: number) {
+    try {
+      const response = await fetch(`/api/complete-todo/${todoId}`, {
+        method: "put",
+      });
+
+      if (!response.ok) throw new Error("There was an error marking this todo completed");
+
+      await response.json();
+
+      setTodos(
+        todos.map((todo) => ({
+          ...todo,
+          ...(todo.id === todoId && { is_complete: true }),
+        }))
+      );
     } catch (error) {
       console.error(error);
     }
@@ -72,6 +94,10 @@ export function App() {
     getAllTodos();
   }, []);
 
+  const activeTodos = todos.filter((todo) => !todo.is_complete && !todo.is_deleted);
+
+  const completedTodos = todos.filter((todo) => todo.is_complete && !todo.is_deleted);
+
   return (
     <div id="app">
       <header>
@@ -81,24 +107,73 @@ export function App() {
         </div>
       </header>
       <main>
-        <form onSubmit={handleNewTodoSubmit}>
+        <form onSubmit={handleNewTodoSubmit} className="new-todo">
           <label>Add todo</label>
           <input
+            placeholder="Enter your new todo"
             value={stagedTodoValue}
             onChange={(e) => setStagedTodoValue(e.target.value)}
           />
-          <button type="submit">Submit</button>
+          <button type="submit" disabled={stagedTodoValue === ""}>
+            Submit
+          </button>
         </form>
         <div className="todos-list-container">
+          <p>To-do</p>
           <ul>
-            {todos.map((todo) => (
+            {activeTodos.length ? (
+              activeTodos.map((todo) => (
+                <li>
+                  <p>{todo.value}</p>
+                  <div className="buttons">
+                    <button
+                      onClick={() => completeTodo(todo.id)}
+                      type="button"
+                      className="complete"
+                    >
+                      Complete
+                    </button>
+                    <button
+                      onClick={() => deleteTodo(todo.id)}
+                      className="delete"
+                      type="button"
+                    >
+                      x
+                    </button>
+                  </div>
+                </li>
+              ))
+            ) : (
               <li>
-                <p>{todo.value}</p>
-                <button onClick={() => deleteTodo(todo.id)} type="button">
-                  x
-                </button>
+                <p className="none-message">No completed todos</p>
               </li>
-            ))}
+            )}
+          </ul>
+        </div>
+
+        <div className="todos-list-container">
+          <p>Completed</p>
+          <ul>
+            {completedTodos.length ? (
+              completedTodos.map((todo) => (
+                <li>
+                  <p>{todo.value}</p>
+                  <div className="buttons">
+                    <button
+                      onClick={() => deleteTodo(todo.id)}
+                      type="button"
+                      className="delete"
+                    >
+                      x
+                    </button>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li>
+                <p className="none-message">No completed todos</p>
+              </li>
+            )}
           </ul>
         </div>
       </main>

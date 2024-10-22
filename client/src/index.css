@@ -35,9 +35,96 @@ main {
   padding: 20px 10px;
 }
 
-main > form {
+main > form.new-todo {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
+  background-color: #444;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+main > form.new-todo > label {
+  font-weight: 500;
+}
+
+main > form.new-todo > input {
+  font-size: 0.875rem;
+  width: 100%;
+  padding: 5px;
+}
+
+main > form.new-todo > button {
+  margin-right: 10px;
+  background-color: lightgreen;
+  color: black;
+  height: 25px;
+  border-radius: 3px;
+  padding: 0px 5px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+main > form.new-todo > button:disabled {
+  background-color: #555;
+  color: grey;
+}
+
+main > .todos-list-container {
+  background-color: #444;
+  margin-bottom: 15px;
+  border-radius: 5px;
+}
+
+main > .todos-list-container > p {
+  padding: 10px;
+  border-bottom: 1px solid #222;
+  font-weight: 500;
+}
+
+main > .todos-list-container > ul {
+  list-style: none;
+}
+
+main > .todos-list-container > ul > li {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+main > .todos-list-container > ul > li:not(:last-child) {
+  border-bottom: 1px solid #333;
+}
+
+main > .todos-list-container > ul > li > .buttons {
+  display: flex;
+}
+
+main > .todos-list-container > ul > li > .buttons > button.complete {
+  margin-right: 10px;
+  background-color: lightgreen;
+  color: black;
+  height: 25px;
+  border-radius: 3px;
+  padding: 0px 5px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+main > .todos-list-container > ul > li > .buttons > button.delete {
+  border-radius: 100%;
+  background-color: crimson;
+  color: black;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
